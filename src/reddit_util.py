@@ -1,31 +1,37 @@
 import datetime
 
 import praw
-from praw.models import Submission, Comment
+from praw.models import Subreddit, Submission, Comment
 
 reddit = praw.Reddit("bot", user_agent="bot user agent (by u/6uep)")
 
 
-def get_post_data(submission: Submission) -> list[dict]:
+def get_comment_data(comment: Comment):
+    # See https://praw.readthedocs.io/en/stable/code_overview/models/comment.html for Comment class fields
+    return {
+        "author": getattr(getattr(comment, "author", ""), "name", ""),
+        "body": getattr(comment, "body", ""),
+        "upvotes": getattr(comment, "score", 0),
+        "comment_date": datetime.datetime.fromtimestamp(getattr(comment, "created_utc", 0)),
+        "submission_date": datetime.datetime.fromtimestamp(getattr(getattr(comment, "submission", 0), "created_utc", 0)),
+        "comment_id": getattr(comment, "id", ""),
+        "submission_id": getattr(getattr(comment, "submission", ""), "id", ""),
+        "submission_title": getattr(getattr(comment, "submission", ""), "title", ""),
+        "subreddit_id": getattr(getattr(getattr(comment, "submission", ""), "subreddit", ""), "id", ""),
+        "subreddit_title": getattr(getattr(getattr(comment, "submission", ""), "subreddit", ""), "title", "")
+    }
+
+
+def get_submission_comments(submission: Submission) -> list[dict]:
     while True:
-        try:
+        try: # replace_more() will return None once there are no more comments to retrieve
             if not submission.comments.replace_more():
                 break
         except Exception as e:
             print(e)
+    # TODO: Insert data into DB instead of returning
+    return list(submission.comments)
 
-    return [
-        {
-            "author": comment.author.name if comment.author else "",
-            "body": comment.body,
-            "created_date": datetime.datetime.fromtimestamp(comment.created_utc),
-            "score": comment.score,
-            "comment_id": comment.id,
-            "submission_id": submission.id,
-            "submission_title": submission.title,
-            "subreddit_id": submission.subreddit.id,
-            "subreddit_title": submission.subreddit.name
-        } 
-        for comment in submission.comments
-    ]
 
+def get_subreddit_top(subreddit: Subreddit, limit: int = None, time_filter: str = "all"):
+    return list(subreddit.top(limit=limit, time_filter=time_filter))
