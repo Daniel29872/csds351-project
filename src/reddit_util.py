@@ -1,4 +1,5 @@
 import datetime
+import json
 
 import praw
 from praw.models import Submission, Comment
@@ -28,4 +29,8 @@ def get_post_data(submission: Submission) -> list[dict]:
         } 
         for comment in submission.comments
     ]
-
+if __name__ == "__main__":
+    submission = reddit.submission(url="https://www.reddit.com/r/pics/comments/1bik7l1/an_orangutan_strolls_through_remains_of_a_former/")
+    post_data = get_post_data(submission)
+    with open("reddit_data.json", "w") as f:
+        json.dump(post_data, f)
