@@ -1,9 +1,8 @@
 import datetime
-import json
-
 import praw
 from praw.models import Subreddit, Submission, Comment
 
+# Initialize PRAW Reddit instance
 reddit = praw.Reddit("bot", user_agent="bot user agent (by u/6uep)")
 
 
@@ -23,14 +22,14 @@ def get_comment_data(comment: Comment):
     }
 
 
-def get_submission_comments(submission: Submission) -> list[dict]:
+def get_submission_comments(submission: Submission) -> list[Comment]:
     while True:
         try: # replace_more() will return None once there are no more comments to retrieve
             if not submission.comments.replace_more():
                 break
         except Exception as e:
             print(e)
-    # TODO: Insert data into DB instead of returning
+
     return list(submission.comments)
 
 

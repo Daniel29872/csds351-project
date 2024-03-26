@@ -1,4 +1,4 @@
-import aws_util
+import util.aws_util as aws_util
 from datetime import datetime
 
 comment = [{"author": "paul attreides", "body": "i am paul muaudib attreides, duke of arrakis", "comment_date": datetime.now(), "upvotes": 2}]
