@@ -3,7 +3,7 @@ import praw
 from praw.models import Subreddit, Submission, Comment
 
 # Initialize PRAW Reddit instance
-reddit = praw.Reddit("bot", user_agent="bot user agent (by u/6uep)")
+reddit = praw.Reddit("bot", user_agent="PC:CWRU_CSDS351:v0.1.0 Comment Sentiment Analysis Project (by u/6uep)")
 
 
 def get_comment_data(comment: Comment) -> dict:
@@ -40,3 +40,15 @@ def get_subreddit_top(name: str, limit: int = None, time_filter: str = "all") ->
 def get_subreddit_hot(name: str, limit: int = None) -> list[Submission]:
     subreddit: Subreddit = reddit.subreddit(name)
     return list(subreddit.hot(limit=limit))
+
+def get_subreddit_new(name: str, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = reddit.subreddit(name)
+    return list(subreddit.new(limit=limit))
+
+def get_subreddit_controversial(name: str, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = reddit.subreddit(name)
+    return list(subreddit.controversial(limit=limit))
+
+def get_subreddit_rising(name: str, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = reddit.subreddit(name)
+    return list(subreddit.rising(limit=limit))
