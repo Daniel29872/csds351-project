@@ -69,3 +69,14 @@ def fetch_posts_from_last_day_with_score():
     connection.close()
 
     return output
+
+
+def fetch_comments_by_submission_id(id: str):
+    connection, cursor = connect()
+
+    sql = """SELECT count(id) FROM comments WHERE submission_id=%s"""
+    cursor.execute(sql, (id,))
+    output = cursor.fetchall()
+    connection.close()
+    
+    return output[0][0]

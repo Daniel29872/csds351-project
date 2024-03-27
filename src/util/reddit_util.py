@@ -3,7 +3,7 @@ import praw
 from praw.models import Subreddit, Submission, Comment
 
 # Initialize PRAW Reddit instance
-reddit = praw.Reddit("bot", user_agent="bot user agent (by u/6uep)")
+reddit = praw.Reddit("bot", user_agent="PC:CWRU_CSDS351:v0.1.0 Comment Sentiment Analysis Project (by u/6uep)")
 
 
 def get_comment_data(comment: Comment) -> dict:
