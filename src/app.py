@@ -6,15 +6,17 @@
 #copy and paste in http link
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import pandas as pd
+from util.aws_util import *
 
-data = pd.read_json("/Users/plschussler/Downloads/environment.json") # replace with "reddit_data.json"
+data = fetch_posts_from_last_day_with_score()
+df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
 
 app = Dash(__name__)
 
 app.layout = html.Div(
     html.Div([
         html.Div(children='My First App with Data'),
-        dash_table.DataTable(id='live-update-table', data=data.to_dict('records'), page_size=10),
+        dash_table.DataTable(id='live-update-table', data=df.to_dict('records'), page_size=10),
         dcc.Graph(id='live-update-graph'),
         dcc.Interval(
                 id='interval-component',
@@ -29,8 +31,9 @@ app.layout = html.Div(
     [Input('interval-component', 'n_intervals')]
 )
 def update_table(n):
-    data = pd.read_json("/Users/plschussler/Downloads/environment.json")
-    return data.to_dict('records')
+    data = fetch_posts_from_last_day_with_score()
+    df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
+    return df.to_dict('records')
 
 # v for live updating graph v
 '''
