@@ -61,7 +61,17 @@ def update_score(id, score):
 def fetch_posts_from_last_day():
     connection, cursor = connect()
 
-    sql = """SELECT id, body FROM comments WHERE comment_date >= NOW() - INTERVAL 1 DAY"""
+    sql = """SELECT id, body FROM comments WHERE comment_date >= NOW() - INTERVAL 1 DAY AND score IS NULL"""
+    cursor.execute(sql)
+    output = cursor.fetchall()
+    connection.close()
+
+    return output
+
+def fetch_posts_from_last_day_with_score():
+    connection, cursor = connect()
+
+    sql = """SELECT id, body FROM comments WHERE comment_date >= NOW() - INTERVAL 1 DAY AND score IS NOT NULL"""
     cursor.execute(sql)
     output = cursor.fetchall()
     connection.close()
