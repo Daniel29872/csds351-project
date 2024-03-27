@@ -6,7 +6,7 @@ from praw.models import Subreddit, Submission, Comment
 reddit = praw.Reddit("bot", user_agent="bot user agent (by u/6uep)")
 
 
-def get_comment_data(comment: Comment):
+def get_comment_data(comment: Comment) -> dict:
     # See https://praw.readthedocs.io/en/stable/code_overview/models/comment.html for Comment class fields
     return {
         "author": getattr(getattr(comment, "author", ""), "name", ""),
@@ -30,8 +30,13 @@ def get_submission_comments(submission: Submission) -> list[Comment]:
         except Exception as e:
             print(e)
 
-    return list(submission.comments)
+    return list(get_comment_data(x) for x in submission.comments)
 
 
-def get_subreddit_top(subreddit: Subreddit, limit: int = None, time_filter: str = "all"):
+def get_subreddit_top(name: str, limit: int = None, time_filter: str = "all") -> list[Submission]:
+    subreddit: Subreddit = reddit.subreddit(name)
     return list(subreddit.top(limit=limit, time_filter=time_filter))
+
+def get_subreddit_hot(name: str, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = reddit.subreddit(name)
+    return list(subreddit.hot(limit=limit))
