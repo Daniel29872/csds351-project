@@ -63,7 +63,7 @@ def fetch_posts_from_last_day():
 def fetch_posts_from_last_day_with_score():
     connection, cursor = connect()
 
-    sql = """SELECT * FROM comments WHERE comment_date >= NOW() - INTERVAL 1 DAY AND score IS NOT NULL"""
+    sql = """SELECT * FROM comments WHERE score IS NOT NULL"""
     cursor.execute(sql)
     output = cursor.fetchall()
     connection.close()
