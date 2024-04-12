@@ -33,22 +33,25 @@ def get_submission_comments(submission: Submission) -> list[Comment]:
     return list(get_comment_data(x) for x in submission.comments)
 
 
-def get_subreddit_top(name: str, limit: int = None, time_filter: str = "all") -> list[Submission]:
-    subreddit: Subreddit = reddit.subreddit(name)
+def get_popular(limit: int = None) -> list[Subreddit]:
+    return list(reddit.subreddits.popular(limit=limit))
+
+def get_subreddit_top(name: str | Subreddit, limit: int = None, time_filter: str = "all") -> list[Submission]:
+    subreddit: Subreddit = name if isinstance(name, Subreddit) else reddit.subreddit(name)
     return list(subreddit.top(limit=limit, time_filter=time_filter))
 
-def get_subreddit_hot(name: str, limit: int = None) -> list[Submission]:
-    subreddit: Subreddit = reddit.subreddit(name)
+def get_subreddit_hot(name: str | Subreddit, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = name if isinstance(name, Subreddit) else reddit.subreddit(name)
     return list(subreddit.hot(limit=limit))
 
-def get_subreddit_new(name: str, limit: int = None) -> list[Submission]:
-    subreddit: Subreddit = reddit.subreddit(name)
+def get_subreddit_new(name: str | Subreddit, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = name if isinstance(name, Subreddit) else reddit.subreddit(name)
     return list(subreddit.new(limit=limit))
 
-def get_subreddit_controversial(name: str, limit: int = None) -> list[Submission]:
-    subreddit: Subreddit = reddit.subreddit(name)
+def get_subreddit_controversial(name: str | Subreddit, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = name if isinstance(name, Subreddit) else reddit.subreddit(name)
     return list(subreddit.controversial(limit=limit))
 
-def get_subreddit_rising(name: str, limit: int = None) -> list[Submission]:
-    subreddit: Subreddit = reddit.subreddit(name)
+def get_subreddit_rising(name: str | Subreddit, limit: int = None) -> list[Submission]:
+    subreddit: Subreddit = name if isinstance(name, Subreddit) else reddit.subreddit(name)
     return list(subreddit.rising(limit=limit))
