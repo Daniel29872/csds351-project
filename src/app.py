@@ -64,4 +64,4 @@ def update_graph(n):
     return fig
 
 if __name__ == '__main__':
-    app.run(host="localhost", debug=True)
+    app.run(host="0.0.0.0", post="8050", debug=True)
