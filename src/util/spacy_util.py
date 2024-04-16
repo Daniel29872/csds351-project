@@ -2,12 +2,12 @@ import spacy
 from aws_util import fetch_posts_from_last_day, update_score
 from spacytextblob.spacytextblob import SpacyTextBlob
 
-nlp = spacy.load('en_core_web_sm')
-nlp.add_pipe('spacytextblob')
+nlp = spacy.load('model')
 
 def get_sentiment_polarity(text):
     doc = nlp(text)
-    return doc._.blob.polarity
+    sentiment = max(doc.cats, key=doc.cats.get)
+    return doc.cats[sentiment]
 
 def process_comments_for_sentiment():
     comments = fetch_posts_from_last_day()
