@@ -24,10 +24,20 @@ dfGraph['hour'] = dfGraph['submission_date'].dt.hour
 # Calculate average score for each hour
 hourly_avg_score = dfGraph.groupby('hour')['score'].mean().reset_index()
 
+ALLOWED_TYPES = (
+    "text", "number", "password", "email", "search",
+    "tel", "url", "range", "hidden",
+)
+
 app = Dash(__name__)
 
 app.layout = html.Div(
     html.Div([
+        dcc.Input(
+            id="input-text",
+            style={"width": "100%"},
+            placeholder="Search for subreddits here!",
+        ),
         html.Div(children='Subreddit Sentiment Analysis'),
         dash_table.DataTable(id='live-update-table', data=df[["body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left'}),
         dcc.Graph(figure=px.histogram(dfGraph, x='hour', y='score', histfunc='avg'), id='live-update-graph'), #the px.histogram might be slightly wrong?
@@ -41,11 +51,13 @@ app.layout = html.Div(
 
 @app.callback(
     Output('live-update-table', 'data'),
-    [Input('interval-component', 'n_intervals')]
+    Input('interval-component', 'n_intervals'),
+    Input("input-text", "value")
 )
-def update_table(n):
+def update_table(n, text):
     data = fetch_posts_from_last_day_with_score()
     df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
+    print(text)
     return df[["body", "score"]].to_dict('records')
 
 # v for live updating graph v
