@@ -39,7 +39,7 @@ app.layout = html.Div(
             placeholder="Search for subreddits here!",
         ),
         html.Div(children='Subreddit Sentiment Analysis'),
-        dash_table.DataTable(id='live-update-table', data=df[["body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left'}),
+        dash_table.DataTable(id='live-update-table', data=df[["submission_title", "body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left'}),
         dcc.Graph(figure=px.histogram(dfGraph, x='hour', y='score', histfunc='avg'), id='live-update-graph'), #the px.histogram might be slightly wrong?
         dcc.Interval(
                 id='interval-component',
@@ -58,7 +58,7 @@ def update_table(n, text):
     data = fetch_posts_from_last_day_with_score()
     df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
     print(text)
-    return df[["body", "score"]].to_dict('records')
+    return df[["submission_title", "body", "score"]].to_dict('records')
 
 # v for live updating graph v
 # Callback to update the graph
