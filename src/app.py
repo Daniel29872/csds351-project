@@ -1,5 +1,6 @@
 #https://dash.plotly.com/tutorial
 #https://dash.plotly.com/live-updatess
+#https://dash.plotly.com/dash-core-components/input
 
 #In terminal: pip install dash
 #run: python <path/to/app.py>
@@ -23,12 +24,22 @@ dfGraph['hour'] = dfGraph['submission_date'].dt.hour
 # Calculate average score for each hour
 hourly_avg_score = dfGraph.groupby('hour')['score'].mean().reset_index()
 
+ALLOWED_TYPES = (
+    "text", "number", "password", "email", "search",
+    "tel", "url", "range", "hidden",
+)
+
 app = Dash(__name__)
 
 app.layout = html.Div(
     html.Div([
+        dcc.Input(
+            id="input-text",
+            style={"width": "100%"},
+            placeholder="Search for subreddits here!",
+        ),
         html.Div(children='Subreddit Sentiment Analysis'),
-        #dash_table.DataTable(id='live-update-table', data=df.to_dict('records'), page_size=10),
+        dash_table.DataTable(id='live-update-table', data=df[["body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left'}),
         dcc.Graph(figure=px.histogram(dfGraph, x='hour', y='score', histfunc='avg'), id='live-update-graph'), #the px.histogram might be slightly wrong?
         dcc.Interval(
                 id='interval-component',
@@ -37,16 +48,18 @@ app.layout = html.Div(
         )
     ])
 )
-'''
+
 @app.callback(
     Output('live-update-table', 'data'),
-    [Input('interval-component', 'n_intervals')]
+    Input('interval-component', 'n_intervals'),
+    Input("input-text", "value")
 )
-def update_table(n):
+def update_table(n, text):
     data = fetch_posts_from_last_day_with_score()
     df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
-    return df.to_dict('records')
-'''
+    print(text)
+    return df[["body", "score"]].to_dict('records')
+
 # v for live updating graph v
 # Callback to update the graph
 @app.callback(
@@ -55,7 +68,8 @@ def update_table(n):
 )
 def update_graph(n):
     # Create a bar plot of hourly average scores
-    fig = go.Figure(go.Line(x=hourly_avg_score['hour'], y=hourly_avg_score['score'])) #swap bar to line?
+    # Line might be deprecated - plotly.graph_objs.layout.shape.Line
+    fig = go.Figure(go.Line(x=hourly_avg_score['hour'], y=hourly_avg_score['score'])) #swap bar to line? 
     fig.update_layout(
         title='How is r/politics feeling?',
         xaxis_title='Hour',
@@ -66,4 +80,4 @@ def update_graph(n):
 server = app.server
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", post="8050", debug=True)
+    app.run_server(host="0.0.0.0", port=8050)
