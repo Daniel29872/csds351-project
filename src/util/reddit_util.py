@@ -18,7 +18,7 @@ def get_comment_data(comment: Comment) -> dict:
         "submission_id": getattr(getattr(comment, "submission", ""), "id", ""),
         "submission_title": getattr(getattr(comment, "submission", ""), "title", ""),
         "subreddit_id": getattr(getattr(getattr(comment, "submission", ""), "subreddit", ""), "id", ""),
-        "subreddit_title": getattr(getattr(getattr(comment, "submission", ""), "subreddit", ""), "title", "")
+        "subreddit_title": getattr(getattr(getattr(comment, "submission", ""), "subreddit", ""), "display_name", "")
     }
 
 
@@ -35,6 +35,9 @@ def get_submission_comments(submission: Submission) -> list[Comment]:
 
 def get_popular(limit: int = None) -> list[Subreddit]:
     return list(reddit.subreddits.popular(limit=limit))
+
+def get_default(limit: int = None) -> list[Subreddit]:
+    return list(reddit.subreddits.default(limit=limit))
 
 def get_subreddit_top(name: str | Subreddit, limit: int = None, time_filter: str = "all") -> list[Submission]:
     subreddit: Subreddit = name if isinstance(name, Subreddit) else reddit.subreddit(name)

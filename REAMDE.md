@@ -1,7 +1,7 @@
 ### Virtual Environment:
 
 python -m venv env
-.env\Scripts\activate
+env\Scripts\activate
 
 ### Intalling Python Modules:
 
