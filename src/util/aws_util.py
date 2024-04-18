@@ -1,7 +1,7 @@
 import pymysql
 import os
 from dotenv import load_dotenv
-
+import pandas as pd
 
 def connect():
     load_dotenv()
@@ -80,3 +80,18 @@ def fetch_count_by_submission_id(id: str):
     connection.close()
     
     return output[0][0]
+
+def clean_data_before_analysis():
+    connection, cursor = connect()
+
+    #Delete comments with emojis
+    sql = """DELETE FROM comments WHERE HEX(body) RLIKE '^(..)*F.'"""
+    cursor.execute(sql)
+    print("Comments with emojis dropped.")
+    #Delete comment with deleted bodies
+    sql = """DELETE FROM comments WHERE body='[deleted]' OR body='[removed]' OR body=null"""
+    print("Deleted, removed, and null comments dropped.")
+
+    sql = """DELETE FROM comments WHERE body LIKE '%https%'"""
+    connection.commit()
+    connection.close()
