@@ -2,6 +2,7 @@ import pymysql
 import os
 from dotenv import load_dotenv
 import pandas as pd
+import re
 
 def connect():
     load_dotenv()
@@ -81,6 +82,31 @@ def fetch_count_by_submission_id(id: str):
     
     return output[0][0]
 
+def fetch_posts_from_subreddit(subreddit: str):
+    connection, cursor = connect()
+
+    sql = """SELECT * FROM comments WHERE subreddit_title=%s ORDER BY score DESC"""
+    cursor.execute(sql, (subreddit,))
+    output = cursor.fetchall()
+    connection.close()
+
+    return output
+
+def fetch_subreddits():
+    connection, cursor = connect()
+
+    sql = """SELECT DISTINCT subreddit_title FROM comments ORDER BY subreddit_title ASC"""
+    cursor.execute(sql)
+    output = cursor.fetchall()
+    connection.close()
+    
+    subreddits = []
+
+    for o in output:
+        subreddits.append(o[0])
+        
+    return subreddits
+
 def clean_data_before_analysis():
     connection, cursor = connect()
 
@@ -88,10 +114,15 @@ def clean_data_before_analysis():
     sql = """DELETE FROM comments WHERE HEX(body) RLIKE '^(..)*F.'"""
     cursor.execute(sql)
     print("Comments with emojis dropped.")
+
     #Delete comment with deleted bodies
     sql = """DELETE FROM comments WHERE body='[deleted]' OR body='[removed]' OR body=null"""
     print("Deleted, removed, and null comments dropped.")
+    cursor.execute(sql)
 
     sql = """DELETE FROM comments WHERE body LIKE '%https%'"""
+    print("Comments with links removed.")
+    cursor.execute(sql)
+
     connection.commit()
     connection.close()

@@ -1,12 +1,13 @@
 from util.aws_util import *
 from util.reddit_util import *
 
+file = open("src/top_subreddits.txt", "r")
+subreddits = file.readlines()
 
-subreddits = get_popular(100)
 print(f"Found {len(subreddits)} subreddits including:", *[f"'{x.title}'" for x in subreddits[:3]])
 
 for subreddit in subreddits:
-    submissions = get_subreddit_top(subreddit, limit=50, time_filter="week")
+    submissions = get_subreddit_top(subreddit, limit=5, time_filter="week")
     print(f"Found {len(submissions)} posts in '{subreddit.title}'")
 
     for submission in submissions:

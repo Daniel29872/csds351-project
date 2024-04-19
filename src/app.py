@@ -10,8 +10,12 @@ import pandas as pd
 from util.aws_util import *
 import plotly.graph_objs as go
 import plotly.express as px
+import random
 
-data = fetch_posts_from_last_day_with_score()
+subreddits = fetch_subreddits()
+
+data = fetch_posts_from_subreddit(subreddits[random.randint(0, len(subreddits) - 1)])
+
 df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
 
 dfGraph = df[['submission_date', 'score']].copy() 
@@ -33,17 +37,13 @@ app = Dash(__name__)
 
 app.layout = html.Div(
     html.Div([
-        dcc.Input(
-            id="input-text",
-            style={"width": "100%"},
-            placeholder="Search for subreddits here!",
-        ),
         html.Div(children='Subreddit Sentiment Analysis'),
-        dash_table.DataTable(id='live-update-table', data=df[["submission_title", "body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left'}),
+        dcc.Dropdown(subreddits, subreddits[0], id='input-text'),
         dcc.Graph(figure=px.histogram(dfGraph, x='hour', y='score', histfunc='avg'), id='live-update-graph'), #the px.histogram might be slightly wrong?
+        dash_table.DataTable(id='live-update-table', data=df[["submission_title", "body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left'}),
         dcc.Interval(
                 id='interval-component',
-                interval=1*1000, # in milliseconds
+                interval=5*1000, # in milliseconds
                 n_intervals=0
         )
     ])
@@ -55,9 +55,8 @@ app.layout = html.Div(
     Input("input-text", "value")
 )
 def update_table(n, text):
-    data = fetch_posts_from_last_day_with_score()
+    data = fetch_posts_from_subreddit(text)
     df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
-    print(text)
     return df[["submission_title", "body", "score"]].to_dict('records')
 
 # v for live updating graph v
@@ -69,9 +68,10 @@ def update_table(n, text):
 def update_graph(n):
     # Create a bar plot of hourly average scores
     # Line might be deprecated - plotly.graph_objs.layout.shape.Line
-    fig = go.Figure(go.Line(x=hourly_avg_score['hour'], y=hourly_avg_score['score'])) #swap bar to line? 
+    fig = go.Figure(go.Line(x=hourly_avg_score['hour'], y=hourly_avg_score['score'])) #swap bar to line?
+    current_subreddit = df.subreddit_title.unique()[0]
     fig.update_layout(
-        title='How is r/politics feeling?',
+        title='How is r/' + current_subreddit + ' feeling?',
         xaxis_title='Hour',
         yaxis_title='Average Sentiment',
     )
@@ -81,3 +81,4 @@ server = app.server
 
 if __name__ == '__main__':
     app.run_server(host="0.0.0.0", port=8050)
+
