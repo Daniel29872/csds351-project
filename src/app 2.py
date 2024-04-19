@@ -1,6 +1,5 @@
 #https://dash.plotly.com/tutorial
 #https://dash.plotly.com/live-updatess
-#https://dash.plotly.com/interactive-graphing
 #https://dash.plotly.com/dash-core-components/input
 
 #In terminal: pip install dash
@@ -24,10 +23,10 @@ dfGraph = df[['submission_date', 'score']].copy()
 dfGraph['submission_date'] = pd.to_datetime(dfGraph['submission_date'])
 
 # Extract hour from datetime and add it as a new column
-dfGraph['date'] = dfGraph['submission_date'].dt.date
+dfGraph['hour'] = dfGraph['submission_date'].dt.hour
 
-# Calculate average score for each day
-daily_avg_score = dfGraph.groupby('date')['score'].mean().reset_index()
+# Calculate average score for each hour
+hourly_avg_score = dfGraph.groupby('hour')['score'].mean().reset_index()
 
 ALLOWED_TYPES = (
     "text", "number", "password", "email", "search",
@@ -40,10 +39,8 @@ app.layout = html.Div(
     html.Div([
         html.Div(children='Subreddit Sentiment Analysis'),
         dcc.Dropdown(subreddits, subreddits[0], id='input-text'),
-        dcc.Graph(figure=px.histogram(dfGraph, x='date', y='score', histfunc='avg'), id='live-update-graph'), #the px.histogram might be slightly wrong?
-        dash_table.DataTable(id='live-update-table', data=df[["submission_title", "body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left','overflow': 'hidden',
-        'textOverflow': 'ellipsis',
-        'maxWidth': 0}),
+        dcc.Graph(figure=px.histogram(dfGraph, x='hour', y='score', histfunc='avg'), id='live-update-graph'), #the px.histogram might be slightly wrong?
+        dash_table.DataTable(id='live-update-table', data=df[["submission_title", "body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left'}),
         dcc.Interval(
                 id='interval-component',
                 interval=5*1000, # in milliseconds
@@ -66,17 +63,16 @@ def update_table(n, text):
 # Callback to update the graph
 @app.callback(
     Output('live-update-graph', 'figure'),
-    Input('interval-component', 'n_intervals'),
-    Input("input-text", "value")
+    [Input('interval-component', 'n_intervals')]
 )
-def update_graph(n, text):
+def update_graph(n):
     # Create a bar plot of hourly average scores
     # Line might be deprecated - plotly.graph_objs.layout.shape.Line
-    fig = go.Figure(go.Line(x=daily_avg_score['date'], y=daily_avg_score['score'])) #swap bar to line?
+    fig = go.Figure(go.Line(x=hourly_avg_score['hour'], y=hourly_avg_score['score'])) #swap bar to line?
     current_subreddit = df.subreddit_title.unique()[0]
     fig.update_layout(
-        title='How is r/' + text + ' feeling?',
-        xaxis_title='Day',
+        title='How is r/' + current_subreddit + ' feeling?',
+        xaxis_title='Hour',
         yaxis_title='Average Sentiment',
     )
     return fig
