@@ -1,6 +1,6 @@
 import spacy
 import nltk
-from aws_util import fetch_posts_from_last_day, update_score
+from aws_util import fetch_posts_from_last_week, update_score
 from spacytextblob.spacytextblob import SpacyTextBlob
 from nltk.sentiment import SentimentIntensityAnalyzer
 
@@ -20,7 +20,7 @@ def get_average_sentiment(text):
     return (get_textblob_sentiment_polarity(text) + get_nltk_sentiment_polarity(text)) / 2
 
 def process_comments_for_sentiment():
-    comments = fetch_posts_from_last_day()
+    comments = fetch_posts_from_last_week()
 
     for comment in comments:
         comment_id, comment_body = comment

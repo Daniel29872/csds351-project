@@ -50,10 +50,10 @@ def update_score(id, score):
     connection.close()
 
 
-def fetch_posts_from_last_day():
+def fetch_posts_from_last_week():
     connection, cursor = connect()
 
-    sql = """SELECT id, body FROM comments WHERE comment_date >= NOW() - INTERVAL 1 DAY AND score IS NULL"""
+    sql = """SELECT id, body FROM comments WHERE comment_date >= NOW() - INTERVAL 1 WEEK AND score IS NULL"""
     cursor.execute(sql)
     output = cursor.fetchall()
     connection.close()
