@@ -29,6 +29,16 @@ dfGraph['date'] = dfGraph['submission_date'].dt.date
 # Calculate average score for each day
 daily_avg_score = dfGraph.groupby('date')['score'].mean().reset_index()
 
+data_with_scores = fetch_posts_from_last_day_with_score()
+
+dfScores = pd.DataFrame(data_with_scores, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
+
+dfLeaderboard = dfScores[['subreddit_title', 'score']].copy()
+
+subreddit_avg_score = dfLeaderboard.groupby('subreddit_title')['score'].mean().reset_index()
+
+subreddit_avg_score = subreddit_avg_score.sort_values(by=['score'], ascending=False)
+
 ALLOWED_TYPES = (
     "text", "number", "password", "email", "search",
     "tel", "url", "range", "hidden",
@@ -41,9 +51,18 @@ app.layout = html.Div(
         html.Div(children='Subreddit Sentiment Analysis'),
         dcc.Dropdown(subreddits, subreddits[0], id='input-text'),
         dcc.Graph(figure=px.histogram(dfGraph, x='date', y='score', histfunc='avg'), id='live-update-graph'), #the px.histogram might be slightly wrong?
+        dcc.Markdown('''
+## Top 10 most positive comments:'''),
         dash_table.DataTable(id='live-update-table', data=df[["submission_title", "body", "score"]].to_dict('records'), page_size=10, style_cell={'textAlign': 'left','overflow': 'hidden',
         'textOverflow': 'ellipsis',
         'maxWidth': 0}),
+        dcc.Markdown('''
+## Subreddits ranked by positivity:'''),
+        html.Div(
+        dash_table.DataTable(id='leaderboard', data=subreddit_avg_score.to_dict('records'), page_size=10, style_cell={'textAlign': 'left','overflow': 'hidden',
+        'textOverflow': 'ellipsis',
+        'maxWidth': 0})
+        ),
         dcc.Interval(
                 id='interval-component',
                 interval=5*1000, # in milliseconds
@@ -59,7 +78,7 @@ app.layout = html.Div(
 )
 def update_table(n, text):
     data = fetch_posts_from_subreddit(text)
-    df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
+    df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"]).head(10)
     return df[["submission_title", "body", "score"]].to_dict('records')
 
 # v for live updating graph v
