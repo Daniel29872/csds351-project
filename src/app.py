@@ -72,8 +72,22 @@ def update_table(n, text):
 def update_graph(n, text):
     # Create a bar plot of hourly average scores
     # Line might be deprecated - plotly.graph_objs.layout.shape.Line
+    data = fetch_posts_from_subreddit(text)
+
+    df = pd.DataFrame(data, columns=["id", "author", "body", "upvotes", "comment_date", "submission_date", "comment_id", "submission_id", "submission_title", "subreddit_id", "subreddit_title", "score"])
+
+    dfGraph = df[['submission_date', 'score']].copy() 
+
+    dfGraph['submission_date'] = pd.to_datetime(dfGraph['submission_date'])
+
+    # Extract hour from datetime and add it as a new column
+    dfGraph['date'] = dfGraph['submission_date'].dt.date
+
+    # Calculate average score for each day
+    daily_avg_score = dfGraph.groupby('date')['score'].mean().reset_index()
+
     fig = go.Figure(go.Line(x=daily_avg_score['date'], y=daily_avg_score['score'])) #swap bar to line?
-    current_subreddit = df.subreddit_title.unique()[0]
+    
     fig.update_layout(
         title='How is r/' + text + ' feeling?',
         xaxis_title='Day',
